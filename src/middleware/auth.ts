@@ -19,7 +19,7 @@ export const auth = async (
   try {
     const token = request.cookies.token;
     if (!token) {
-      return response.status(400).json({ message: 'Token is required !' });
+      return response.status(400).json({ message: 'login first !' });
     }
     const decodeToken = jwt.verify(token, secretKey);
     if (!decodeToken) {

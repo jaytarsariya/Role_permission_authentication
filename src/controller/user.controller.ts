@@ -30,7 +30,6 @@ export const createUser: RequestHandler = async (request, response) => {
       phone_number: body.phone_number,
       role: body.role,
     };
-    console.log('🚀 ~ constcreateUser:RequestHandler= ~ payload:', payload);
     const data = await User.create(payload);
     return Ok(response, `User is registerd successfully`, data);
   } catch (error: any) {
