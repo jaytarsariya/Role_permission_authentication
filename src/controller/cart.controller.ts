@@ -6,28 +6,82 @@ import { ObjectId } from 'mongodb';
 
 export const addToCart: RequestHandler = async (request, response) => {
   try {
+    let body = request.body;
     let userId = request.udata.id;
-    let productId = request.query.pid;
-
-    let product = await Product.findOne({ _id: productId });
-    let data: any = await Cart.findOne({
-      $and: [{ userId: userId }, { product_id: productId }],
-    });
+    let productId = body.product_id;
+    let total = [];
+    let data: any = await Cart.findOne({ is_deleted: false, userId: userId });
     if (data) {
-      var qty = data.quantity + 1;
-      var price = data?.price * qty;
-      const updatedCart = await Cart.findByIdAndUpdate(data._id, {
-        quantity: qty,
-        totalPrice: price,
-      });
-      return Ok(response, 'Product added into cart !!', updatedCart);
+      let existingProduct = await data.product.find((item: any) =>
+        item.product_id.equals(productId)
+      );
+      if (existingProduct) {
+        var qty = existingProduct.quantity + body.quantity;
+        var subTotal = existingProduct?.price * qty;
+        var tot = existingProduct?.price * body.quantity;
+        var UtotalPrice = data.totalPrice + tot;
+
+        await Cart.updateOne(
+          {
+            _id: data._id,
+            'product.product_id': productId,
+          },
+          {
+            $set: {
+              'product.$.quantity': qty,
+              'product.$.sub_total': subTotal,
+              totalPrice: UtotalPrice,
+            },
+          },
+          {
+            new: true,
+          }
+        );
+
+        let responseData: any = await Cart.findOne({
+          is_deleted: false,
+          userId: userId,
+        });
+
+        return Ok(response, 'product add into cart', responseData);
+      } else {
+        // add new product
+        let myproduct: any = await Product.findOne({ _id: productId });
+        let UsubTotal = myproduct?.price * body.quantity;
+        const product = {
+          product_id: productId,
+          quantity: body.quantity,
+          price: myproduct?.price,
+          sub_total: UsubTotal,
+        };
+        data.product.push(product);
+        const totalPrice = data.product.reduce(
+          (total: any, item: any) => total + item.sub_total,
+          0
+        );
+
+        data.totalPrice = totalPrice;
+        await data.save();
+        let responseData = await Cart.findOne({
+          is_deleted: false,
+          userId: userId,
+        });
+        return Ok(response, 'new product add', responseData);
+      }
     } else {
+      var product: any = await Product.findOne({ _id: productId });
+      let Usubtotal: any = product?.price * body.quantity;
       let payload = {
         userId: userId,
-        product_id: productId,
-        quantity: 1,
-        price: product?.price,
-        totalPrice: product?.price,
+        product: [
+          {
+            product_id: productId,
+            quantity: body.quantity,
+            price: product?.price,
+            sub_total: Usubtotal,
+          },
+        ],
+        totalPrice: Usubtotal,
       };
       const cart = await Cart.create(payload);
       return Ok(response, 'Product added into cart', cart);
