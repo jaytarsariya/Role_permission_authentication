@@ -15,18 +15,20 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    orderItem: {
-      product_id: {
-        type: ObjectId,
-        ref: 'Product',
+    orderItem: [
+      {
+        product_id: {
+          type: ObjectId,
+          ref: 'Product',
+        },
+        quantity: {
+          type: Number,
+        },
+        price: {
+          type: Number,
+        },
       },
-      quantity: {
-        type: Number,
-      },
-      price: {
-        type: Number,
-      },
-    },
+    ],
     address: [
       {
         shipping_address_1: {

@@ -56,7 +56,7 @@ export const loginUser: RequestHandler = async (request, response) => {
       return response.status(400).json({ message: 'Invalid credentials !' });
     }
     const token = await jwt.sign({ id: user._id, role: user.role }, secretKey, {
-      expiresIn: '30d',
+      expiresIn: '1w',
     });
     response.cookie('token', token);
     return Ok(response, `${user.role} is login successfully`, token);

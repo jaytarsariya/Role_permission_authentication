@@ -1,14 +1,14 @@
 import joi from 'joi';
 
 export const createOrderSchema = joi.object({
-  userId: joi.string().required(), // MongoDB ObjectId pattern
-  orderItem: joi
-    .object({
-      product_id: joi.string().required(), // MongoDB ObjectId pattern
-      // quantity: joi.number().required(),
-      // price: joi.number().required(),
-    })
-    .required(),
+  // userId: joi.string().required(), // MongoDB ObjectId pattern
+  // orderItem: joi
+  //   .object({
+  //     product_id: joi.string().required(), // MongoDB ObjectId pattern
+  //     // quantity: joi.number().required(),
+  //     // price: joi.number().required(),
+  //   })
+  // .required(),
   address: joi
     .array()
     .items(
@@ -28,7 +28,8 @@ export const createOrderSchema = joi.object({
       })
     )
     .required(),
-  paymentId: joi.string().optional().allow(null, ''), // Optional field
-  order_status: joi.string().default('PENDING'),
+  payment_mode: joi.string(),
+  // paymentId: joi.string().optional().allow(null, ''), // Optional field
+  // order_status: joi.string().default('PENDING'),
   // total_Price: joi.number(),
 });
