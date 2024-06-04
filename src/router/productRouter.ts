@@ -10,13 +10,7 @@ import {
 import { upload } from '../utils/fileUpload';
 import { auth, authorizerole } from '../middleware/auth';
 
-router.post(
-  '/create',
-  auth,
-  authorizerole('seller'),
-  upload.single('file'),
-  createProduct
-);
+router.post('/create',auth,authorizerole('seller'),upload.single('file'),createProduct);
 
 router.get('/getall', findAllProduct);
 

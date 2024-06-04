@@ -68,3 +68,136 @@ export const viewAllOrder: RequestHandler = async (request, response) => {
     return BadRequest(response, { message: error.message });
   }
 };
+
+export const getUserAndProductDetails: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const data = await Order.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+      {
+        $unwind: '$userDetails',
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'orderItem.product_id',
+          foreignField: '_id',
+          as: 'productDetails',
+        },
+      },
+    ]);
+    return Ok(response, 'order Fetched successfully', data);
+  } catch (error: any) {
+    return BadRequest(response, { message: error.message });
+  }
+};
+
+// Howmany total product sale ?
+export const getTotalSalesByProduct: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const data = await Order.aggregate([
+      {
+        $unwind: '$orderItem',
+      },
+      {
+        $group: {
+          _id: '$orderItem.product_id',
+          totalSales: {
+            $sum: { $multiply: ['$orderItem.price', '$orderItem.quantity'] },
+          },
+          totalQuantity: { $sum: '$orderItem.quantity' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'productDetails',
+        },
+      },
+      {
+        $unwind: '$productDetails',
+      },
+    ]);
+    return Ok(response, 'order fetched successfully', data);
+  } catch (error: any) {
+    return BadRequest(response, { message: error.message });
+  }
+};
+
+export const getOrderWithSpecificDateRange: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    let body = request.body;
+    console.log(new Date(body.fromDate));
+
+    const data = await Order.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(body.fromDate),
+            $lte: new Date(body.toDate),
+          },
+        },
+      },
+    ]);
+    return Ok(response, 'fetched successfully', data);
+  } catch (error: any) {
+    return BadRequest(response, { message: error.message });
+  }
+};
+
+export const getTotalOrdersOfUsers: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const data = await Order.aggregate([
+      {
+        $group: {
+          _id: '$userId',
+          totalOrders: { $sum: 1 },
+          totalAmountSpent: { $sum: '$total_Price' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+      {
+        $unwind: '$userDetails',
+      },
+      {
+        $project: {
+          _id: 1,
+          totalOrders: 1,
+          totalAmountSpent: 1,
+          'userDetails.name': 1,
+          'userDetails.address': 1,
+        },
+      },
+    ]);
+    return Ok(response, 'fetched successfully', data);
+  } catch (error: any) {
+    return BadRequest(response, { message: error.message });
+  }
+};

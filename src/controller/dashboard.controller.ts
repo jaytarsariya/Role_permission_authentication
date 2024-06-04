@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import { Ok, BadRequest } from '../helper/error-handle';
 import { Order } from '../models/order.model';
 import { ObjectId } from 'mongodb';
+import { User } from '../models/user.model';
 
 export const dailyOrder: RequestHandler = async (request, response) => {
   try {
@@ -33,3 +34,15 @@ export const dailyOrder: RequestHandler = async (request, response) => {
     return BadRequest(response, { message: error.message });
   }
 };
+
+
+// export const getUserByCriteria:RequestHandler = async(request,response)=>{
+//   try {
+//     let body = request.body
+
+//     const data = await User.findOne({_id:body.userId},{proje})
+//     return Ok(response,'data fetched successfully',data)
+//   } catch (error:any) {
+//     return BadRequest(response,{message:error.message})
+//   }
+// }

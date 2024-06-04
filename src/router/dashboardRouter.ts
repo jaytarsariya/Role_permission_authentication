@@ -5,4 +5,6 @@ import { auth } from '../middleware/auth';
 
 router.get('/daily', auth, dailyOrder);
 
+// router.post('/criteria',getUserByCriteria)
+
 export default router;
