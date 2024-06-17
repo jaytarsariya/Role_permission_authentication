@@ -10,23 +10,20 @@ export const createOrderSchema = joi.object({
   //   })
   // .required(),
   address: joi
-    .array()
-    .items(
-      joi.object({
-        shipping_address_1: joi.string().required(),
-        shipping_address_2: joi.string().allow(null, ''), // Optional field
-        city: joi.string().required(),
-        zip: joi.string().required(),
-        country: joi.string().required(),
-        phone: joi
-          .string()
-          .regex(/^[0-9]{10}$/)
-          .messages({
-            'string.pattern.base': `phone number must have 10 digits`,
-          })
-          .required(), // Assuming phone as string to accommodate different phone number formats
-      })
-    )
+    .object({
+      shipping_address_1: joi.string().required(),
+      shipping_address_2: joi.string().allow(null, ''), // Optional field
+      city: joi.string().required(),
+      zip: joi.string().required(),
+      country: joi.string().required(),
+      phone: joi
+        .string()
+        .regex(/^[0-9]{10}$/)
+        .messages({
+          'string.pattern.base': `phone number must have 10 digits`,
+        })
+        .required(), // Assuming phone as string to accommodate different phone number formats
+    })
     .required(),
   payment_mode: joi.string(),
   // paymentId: joi.string().optional().allow(null, ''), // Optional field

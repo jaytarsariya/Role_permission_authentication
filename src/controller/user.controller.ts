@@ -87,7 +87,7 @@ export const findAllUser: RequestHandler = async (request, response) => {
     if (typeof alreadyInCached === 'string') {
       return JSON.parse(alreadyInCached);
     }
-    const user = await User.find({ is_deleted: false, role:'buyer'});
+    const user = await User.find({ is_deleted: false, role: 'buyer' });
     nodeCache.set('CachedData', JSON.stringify(user), 60);
     return Ok(response, 'All user fetched successfully', user);
   } catch (error: any) {

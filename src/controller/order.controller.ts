@@ -1,10 +1,11 @@
-import { RequestHandler } from 'express';
+import { RequestHandler, request } from 'express';
 import { Ok, BadRequest } from '../helper/error-handle';
 import { Order } from '../models/order.model';
 import { createOrderSchema } from '../schema/orderSchema';
 import { Cart } from '../models/cart.model';
 import Razorpay from 'razorpay';
 import Stripe from 'stripe';
+import { ObjectId } from 'mongodb';
 const config = require('../config/config')['payment'];
 
 const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
@@ -39,14 +40,14 @@ export const createOrder: RequestHandler = async (request, response) => {
         quantity: item.quantity,
         price: item.price,
       })),
-      address: body.address.map((addr: any) => ({
-        shipping_address_1: addr.shipping_address_1,
-        shipping_address_2: addr.shipping_address_2,
-        city: addr.city,
-        zip: addr.zip,
-        country: addr.country,
-        phone: addr.phone,
-      })),
+      address: {
+        shipping_address_1: body.address.shipping_address_1,
+        shipping_address_2: body.address.shipping_address_2,
+        city: body.address.city,
+        zip: body.address.zip,
+        country: body.address.country,
+        phone: body.address.phone,
+      },
       payment_mode: body.payment_mode, // Assuming payment mode comes in the request body
       paymentId: paymentIntent.id,
       total_Price: cart.totalPrice,
@@ -62,8 +63,10 @@ export const createOrder: RequestHandler = async (request, response) => {
 export const viewAllOrder: RequestHandler = async (request, response) => {
   try {
     let userId = request.udata.id;
-    const data = await Order.find({ userId: userId });
-    return Ok(response, 'order fetched successfully', data);
+    const orders = await Order.find({ userId }).populate(
+      'orderItem.product_id'
+    );
+    return Ok(response, 'order fetched successfully', orders);
   } catch (error: any) {
     return BadRequest(response, { message: error.message });
   }
@@ -118,6 +121,11 @@ export const getTotalSalesByProduct: RequestHandler = async (
             $sum: { $multiply: ['$orderItem.price', '$orderItem.quantity'] },
           },
           totalQuantity: { $sum: '$orderItem.quantity' },
+          averagePrice: { $avg: '$orderItem.price' },
+          maxPrice: { $max: '$orderItem.price' },
+          minPrice: { $min: '$orderItem.price' },
+          uniqueProducts: { $addToSet: '$orderItem.product_id' },
+          orderCount: { $sum: 1 },
         },
       },
       {

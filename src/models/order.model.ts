@@ -29,28 +29,26 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
-    address: [
-      {
-        shipping_address_1: {
-          type: String,
-        },
-        shipping_address_2: {
-          type: String,
-        },
-        city: {
-          type: String,
-        },
-        zip: {
-          type: String,
-        },
-        country: {
-          type: String,
-        },
-        phone: {
-          type: Number,
-        },
+    address: {
+      shipping_address_1: {
+        type: String,
       },
-    ],
+      shipping_address_2: {
+        type: String,
+      },
+      city: {
+        type: String,
+      },
+      zip: {
+        type: String,
+      },
+      country: {
+        type: String,
+      },
+      phone: {
+        type: Number,
+      },
+    },
     payment_mode: {
       type: String,
       enum: ['COD', 'PREPAID'],
